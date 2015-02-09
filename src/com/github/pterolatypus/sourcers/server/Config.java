@@ -3,8 +3,12 @@ package com.github.pterolatypus.sourcers.server;
 public class Config {
 
 	public static final boolean SERVER_DEBUG = false;
-	public static final String SERVER_NAME = "RuneScape";
+	public static final String SERVER_NAME = "Source RS";
 	public static final int CLIENT_VERSION = 1;
+	
+	//Hardcoded paths for DB files, for now.
+	public static String PATH_CFG = "./Data/cfg/";
+	public static String PATH_ITEM_XML = PATH_CFG + "items.xml";
 
 	public static int MESSAGE_DELAY = 6000;
 	public static final int ITEM_LIMIT = 25000;
@@ -36,9 +40,9 @@ public class Config {
 	public static final int[] FUN_WEAPONS = { 2460, 2461, 2462, 2463, 2464,
 			2465, 2466, 2467, 2468, 2469, 2470, 2471, 2471, 2473, 2474, 2475,
 			2476, 2477 }; // fun weapons for dueling
-	public static final boolean ADMIN_CAN_TRADE = false; // can admins trade?
-	public static final boolean ADMIN_DROP_ITEMS = false;
-	public static final boolean ADMIN_CAN_SELL_ITEMS = false;
+	public static final boolean ADMIN_CAN_TRADE = true; // can admins trade?
+	public static final boolean ADMIN_DROP_ITEMS = true;
+	public static final boolean ADMIN_CAN_SELL_ITEMS = true;
 	public static final int START_LOCATION_X = 3087; // start here
 	public static final int START_LOCATION_Y = 3500;
 	public static final int RESPAWN_X = 3087; // when dead respawn here

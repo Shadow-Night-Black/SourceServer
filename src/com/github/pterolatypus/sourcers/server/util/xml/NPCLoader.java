@@ -9,24 +9,26 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
 public class NPCLoader {
-
-	SAXBuilder builder = new SAXBuilder();
-	Document doc;
-	String path;
-
+	
+	SAXBuilder	builder	= new SAXBuilder();
+	Document	doc;
+	String		path;
+	
 	public NPCLoader(String path) {
 		this.path = path;
 		reloadConfig();
 	}
-
+	
 	public void reloadConfig() {
 		try {
 			doc = builder.build(new File(path));
-		} catch (JDOMException | IOException e) {
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public Element getNpc(int id) {
 		return (Element) doc.getRootElement().getChildren().get(id);
 	}
@@ -34,5 +36,5 @@ public class NPCLoader {
 	public int size() {
 		return doc.getRootElement().getChildren().size();
 	}
-
+	
 }

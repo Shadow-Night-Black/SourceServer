@@ -1,0 +1,6 @@
+bin
+deps
+run.bat
+compile.bat
+bin/*
+deps/*

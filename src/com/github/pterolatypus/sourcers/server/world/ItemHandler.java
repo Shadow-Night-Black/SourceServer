@@ -2,20 +2,25 @@ package com.github.pterolatypus.sourcers.server.world;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Scanner;
+import java.util.Map;
+
+import org.jdom2.Element;
 
 import com.github.pterolatypus.sourcers.server.Config;
+import com.github.pterolatypus.sourcers.server.error.IDMismatchException;
 import com.github.pterolatypus.sourcers.server.model.items.GroundItem;
 import com.github.pterolatypus.sourcers.server.model.items.Item;
 import com.github.pterolatypus.sourcers.server.model.players.Client;
 import com.github.pterolatypus.sourcers.server.model.players.Player;
 import com.github.pterolatypus.sourcers.server.model.players.PlayerHandler;
-import com.github.pterolatypus.sourcers.server.util.Misc;
+import com.github.pterolatypus.sourcers.server.util.xml.item.ItemConverter;
+import com.github.pterolatypus.sourcers.server.util.xml.item.ItemElement;
+import com.github.pterolatypus.sourcers.server.util.xml.item.ItemLoader;
 
 /**
  * Handles ground items
@@ -23,12 +28,18 @@ import com.github.pterolatypus.sourcers.server.util.Misc;
 
 public class ItemHandler {
 
-	public List<Item> itemList = new ArrayList<Item>(Config.ITEM_LIMIT);
+	public Map<Integer, Item> itemList = new HashMap<Integer, Item>(Config.ITEM_LIMIT);
 	public List<GroundItem> items = new ArrayList<GroundItem>();
 	public static final int HIDE_TICKS = 100;
 
 	public ItemHandler() {
-		loadItemList("item.cfg");
+		try {
+			loadItemList();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (IDMismatchException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -171,7 +182,7 @@ public class ItemHandler {
 					}
 				}
 			}
-			if (!com.github.pterolatypus.sourcers.server.model.items.ItemO.itemStackable[itemId]
+			if (getItemList(itemId).getStackSize() > 1
 					&& itemAmount > 0) {
 				for (int j = 0; j < itemAmount; j++) {
 					c.getItems().createGroundItem(itemId, itemX, itemY, 1);
@@ -293,98 +304,80 @@ public class ItemHandler {
 		removeItem(i);
 	}
 
-	public void newItemList(int ItemId, String ItemName,
-			String ItemDescription, double ShopValue, double LowAlch,
-			double HighAlch, int Bonuses[]) {
-		// first, search for a free slot
-		int slot = -1;
-		for (int i = 0; i < itemList.size(); i++) {
-			if (itemList.get(i).getItemID() < 0) {
-				slot = i;
-				break;
-			}
-		}
-
-		if (slot == -1)
-			return; // no free slot found
-		Item newItemList = new Item(ItemId, ItemName, ItemDescription, ShopValue, LowAlch, HighAlch, Bonuses);
-		itemList.set(slot, newItemList);
-	}
-
 	public Item getItemList(int i) {
-		return (i >= 0 && i < itemList.size())?itemList.get(i):new Item(true);
+		return (i >= 0 && i < itemList.size()) ? itemList.get(i) : new Item(
+				true);
 	}
 
-	public boolean loadItemList(String FileName) {
-		String line = "";
-		String token = "";
-		String token2 = "";
-		String token2_2 = "";
-		String[] token3 = new String[10];
-		boolean EndOfFile = false;
-		BufferedReader characterfile = null;
-		try {
-			characterfile = new BufferedReader(new FileReader("./Data/cfg/"
-					+ FileName));
-		} catch (FileNotFoundException fileex) {
-			Misc.println(FileName + ": file not found.");
-			return false;
-		}
-		try {
-			line = characterfile.readLine();
-		} catch (IOException ioexception) {
-			Misc.println(FileName + ": error loading file.");
-			return false;
-		}
-		while (EndOfFile == false && line != null) {
-			line = line.trim();
-			int spot = line.indexOf("=");
-			if (spot > -1) {
-				token = line.substring(0, spot);
-				token = token.trim();
-				token2 = line.substring(spot + 1);
-				token2 = token2.trim();
-				token2_2 = token2.replaceAll("\t\t", "\t");
-				token2_2 = token2_2.replaceAll("\t\t", "\t");
-				token2_2 = token2_2.replaceAll("\t\t", "\t");
-				token2_2 = token2_2.replaceAll("\t\t", "\t");
-				token2_2 = token2_2.replaceAll("\t\t", "\t");
-				token3 = token2_2.split("\t");
-				if (token.equals("item")) {
-					int[] Bonuses = new int[12];
-					for (int i = 0; i < 12; i++) {
-						if (token3[(6 + i)] != null) {
-							Bonuses[i] = Integer.parseInt(token3[(6 + i)]);
-						} else {
-							break;
-						}
-					}
-					newItemList(Integer.parseInt(token3[0]),
-							token3[1].replaceAll("_", " "),
-							token3[2].replaceAll("_", " "),
-							Double.parseDouble(token3[4]),
-							Double.parseDouble(token3[4]),
-							Double.parseDouble(token3[6]), Bonuses);
+	public boolean loadItemList() throws IOException, IDMismatchException {
+		
+		File file = new File(Config.PATH_CFG+"item.cfg");
+		if (file.exists()) {
+			ItemConverter converter = ItemConverter.getInstance();
+			BufferedReader reader = new BufferedReader(new FileReader(file));
+			while (reader.ready()) {
+				String s = reader.readLine().replaceAll(" ", "");
+				if (s.startsWith("/") || s.equals("[ENDOFITEMLIST]") || s.matches("\\s*")) {
+					continue;
 				}
-			} else {
-				if (line.equals("[ENDOFITEMLIST]")) {
-					try {
-						characterfile.close();
-					} catch (IOException ioexception) {
-					}
-					return true;
+				String[] token = s.split("\\t+");
+				token[0] = token[0].replaceAll("item=", "");
+				int id = Integer.parseInt(token[0]);
+				String name = token[1];
+				String desc = token[2];
+				int shopVal = Integer.parseInt(token[3]);
+				int lowAlch = Integer.parseInt(token[4]);
+				int hiAlch = Integer.parseInt(token[5]);
+				int[] bonuses = new int[12];
+				for (int i = 0; i <= 11; i++) {
+					bonuses[i] = Integer.parseInt(token[i+6]);
 				}
+				int stackSize = 1;
+				converter.addItem(id, name, desc, shopVal, lowAlch, hiAlch, bonuses, stackSize);
 			}
-			try {
-				line = characterfile.readLine();
-			} catch (IOException ioexception1) {
-				EndOfFile = true;
+			converter.save();
+			converter.abandon();
+			reader.close();
+		}
+		
+		ItemLoader loader = new ItemLoader(Config.PATH_ITEM_XML);
+		for (int i = 0; i < loader.size(); i++) {
+			Element e = loader.getItem(i);
+			int id = Integer.parseInt(e.getChildText(ItemElement.PARAM_ID));
+			
+			if (id >= 0) {
+				
+				int newID = Integer.parseInt(e.getChildText(ItemElement.PARAM_ID));
+				String newName = e.getChildText(ItemElement.PARAM_NAME);
+				String newDesc = e.getChildText(ItemElement.PARAM_DESCRIPTION);
+				String s = e.getChildText(ItemElement.PARAM_VALUE).replaceAll("\\.0", "");
+				int newVal = Integer.parseInt(s.isEmpty()?"0":s);
+				s = e.getChildText(ItemElement.PARAM_LO_ALCH).replaceAll("\\.0", "");
+				int newLo = Integer.parseInt(s.isEmpty()?"0":s);
+				s = e.getChildText(ItemElement.PARAM_LO_ALCH).replaceAll("\\.0", "");
+				int newHi = Integer.parseInt(s.isEmpty()?"0":s);
+				int[] newBonus = new int[12];
+				for (int k = 1; k <= 12; k++) {
+					newBonus[k-1] = Integer.parseInt(e.getChildText(ItemElement.PARAM_BONUS_ROOT+k));
+				}
+				int newStack;
+				try {
+					newStack = Integer.parseInt(e.getChildText(ItemElement.PARAM_STACK_SIZE));
+				} catch (Exception e1) {
+					e.addContent(new Element(ItemElement.PARAM_STACK_SIZE).addContent("1"));
+					loader.save();
+					newStack = Integer.parseInt(e.getChildText(ItemElement.PARAM_STACK_SIZE));
+				}
+				
+				Item it =  new Item(newID, newName, newDesc, newVal, newLo, newHi, newBonus, newStack);
+				
+				if (itemList.containsKey(id)) {
+					throw new IDMismatchException("item", it);
+				}
+				
+				itemList.put(newID, it);
 			}
 		}
-		try {
-			characterfile.close();
-		} catch (IOException ioexception) {
-		}
-		return false;
+		return true;
 	}
 }

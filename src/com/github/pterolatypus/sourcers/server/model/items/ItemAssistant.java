@@ -324,11 +324,11 @@ public class ItemAssistant {
 		if (item <= 0) {
 			return false;
 		}
-		if ((((freeSlots() >= 1) || playerHasItem(item, 1)) && ItemO.itemStackable[item])
-				|| ((freeSlots() > 0) && !ItemO.itemStackable[item])) {
+		if ((((freeSlots() >= 1) || playerHasItem(item, 1)) && Server.itemHandler.getItemList(item).getStackSize() > 1)
+				|| (freeSlots() > 0)) {
 			for (int i = 0; i < c.playerItems.length; i++) {
 				if ((c.playerItems[i] == (item + 1))
-						&& ItemO.itemStackable[item] && (c.playerItems[i] > 0)) {
+						&& Server.itemHandler.getItemList(item).getStackSize() > 1 && (c.playerItems[i] > 0)) {
 					c.playerItems[i] = (item + 1);
 					if (((c.playerItemsN[i] + amount) < Config.MAXITEM_AMOUNT)
 							&& ((c.playerItemsN[i] + amount) > -1)) {
@@ -1446,7 +1446,7 @@ public class ItemAssistant {
 			if (c.playerItems[fromSlot] <= 0) {
 				return false;
 			}
-			if (ItemO.itemStackable[c.playerItems[fromSlot] - 1]
+			if (Server.itemHandler.getItemList(c.playerItems[fromSlot] - 1).getStackSize() > 1
 					|| c.playerItemsN[fromSlot] > 1) {
 				int toBankSlot = 0;
 				boolean alreadyInBank = false;

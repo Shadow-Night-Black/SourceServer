@@ -177,11 +177,7 @@ public class ItemO {
 	}
 
 	public static String getItemName(int id) {
-		for (int j = 0; j < Server.itemHandler.itemList.size(); j++) {
-			if (Server.itemHandler.getItemList(j).getItemID() == id)
-				return Server.itemHandler.getItemList(j).getItemName();
-		}
-		return null;
+		return Server.itemHandler.getItemList(id).getItemName();
 	}
 
 	public static boolean[] itemStackable = new boolean[Config.ITEM_LIMIT];

@@ -791,7 +791,7 @@ public class TradeAndDuel {
 		}
 		String itemId = "";
 		for (GameItem item : stakedItems) {
-			if (ItemO.itemStackable[item.id] || ItemO.itemIsNote[item.id]) {
+			if (Server.itemHandler.getItemList(item.id).getStackSize() > 1 || ItemO.itemIsNote[item.id]) {
 				itemId += c.getItems().getItemName(item.id) + " x "
 						+ Misc.format(item.amount) + "\\n";
 			} else {
@@ -980,7 +980,7 @@ public class TradeAndDuel {
 	public void claimStakedItems() {
 		for (GameItem item : otherStakedItems) {
 			if (item.id > 0 && item.amount > 0) {
-				if (ItemO.itemStackable[item.id]) {
+				if (Server.itemHandler.getItemList(item.id).getStackSize() > 1) {
 					if (!c.getItems().addItem(item.id, item.amount)) {
 						Server.itemHandler.createGroundItem(c, item.id,
 								c.getX(), c.getY(), item.amount, c.getId());
@@ -998,7 +998,7 @@ public class TradeAndDuel {
 		}
 		for (GameItem item : stakedItems) {
 			if (item.id > 0 && item.amount > 0) {
-				if (ItemO.itemStackable[item.id]) {
+				if (Server.itemHandler.getItemList(item.id).getStackSize() > 1) {
 					if (!c.getItems().addItem(item.id, item.amount)) {
 						Server.itemHandler.createGroundItem(c, item.id,
 								c.getX(), c.getY(), item.amount, c.getId());

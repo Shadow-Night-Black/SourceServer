@@ -10,10 +10,12 @@ import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
+import com.github.pterolatypus.sourcers.server.Config;
+
 public class ItemConverter {
 
 	private static ItemConverter instance;
-	Document items = new Document();
+	private Document items;
 	
 	public static ItemConverter getInstance() {
 		if (instance == null) {
@@ -23,24 +25,25 @@ public class ItemConverter {
 	}
 	
 	public ItemConverter() {
-		items.addContent(new Element("items"));
+		items = new Document();
+		items.addContent(new Element(ItemElement.PARAM_ROOT_ELEMENT));
 	}
 	
 	public void abandon() {
 		instance = null;
 	}
 
-	public void addItem(int id, String name, String desc, Double shopVal,
-			Double lowAlch, Double hiAlch, int[] bonuses) {
+	public void addItem(int id, String name, String desc, int shopVal,
+			int lowAlch, int hiAlch, int[] bonuses, int stackSize) {
 		
-		items.getRootElement().addContent(new ItemElement(id, name, desc, shopVal, lowAlch, hiAlch, bonuses));
+		items.getRootElement().addContent(new ItemElement(id, name, desc, shopVal, lowAlch, hiAlch, bonuses, stackSize));
 	}
 	
 	public void save() {
 		XMLOutputter out = new XMLOutputter();
 		out.setFormat(Format.getPrettyFormat());
 		try {
-			File file = new File("./Data/cfg/items.xml");
+			File file = new File(Config.PATH_ITEM_XML);
 			if(file.exists()) {
 				file.delete();
 			}
