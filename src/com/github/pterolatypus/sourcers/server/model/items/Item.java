@@ -10,6 +10,14 @@ public class Item {
 	private double hiAlchValue = 0;
 	private int[] bonuses = new int[12];
 
+	public Item() throws InstantiationException {
+		throw new InstantiationException("You can't call the default constructor for this class; pass an arbitrary boolean to it to confirm you want a blank instance!");
+	}
+	
+	public Item(boolean bNull) {
+		super();
+	}
+	
 	public Item(int itemID, String itemName, String description, double val,
 			double loA, double hiA, int[] bonuses) {
 		super();

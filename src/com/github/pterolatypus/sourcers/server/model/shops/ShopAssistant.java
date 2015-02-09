@@ -97,17 +97,12 @@ public class ShopAssistant {
 	}
 
 	public double getItemShopValue(int ItemID, int Type, int fromSlot) {
-		double ShopValue = 1;
 		double TotPrice = 0;
 		for (int i = 0; i < Config.ITEM_LIMIT; i++) {
-			if (Server.itemHandler.ItemList[i] != null) {
-				if (Server.itemHandler.ItemList[i].itemId == ItemID) {
-					ShopValue = Server.itemHandler.ItemList[i].ShopValue;
-				}
+			if (Server.itemHandler.getItemList(i).getItemID() == ItemID) {
+				TotPrice = Server.itemHandler.getItemList(i).getShopValue();
 			}
 		}
-
-		TotPrice = ShopValue;
 
 		if (ShopHandler.ShopBModifier[c.myShopId] == 1) {
 			TotPrice *= 1;
@@ -123,10 +118,8 @@ public class ShopAssistant {
 
 	public int getItemShopValue(int itemId) {
 		for (int i = 0; i < Config.ITEM_LIMIT; i++) {
-			if (Server.itemHandler.ItemList[i] != null) {
-				if (Server.itemHandler.ItemList[i].itemId == itemId) {
-					return (int) Server.itemHandler.ItemList[i].ShopValue;
-				}
+			if (Server.itemHandler.getItemList(i).getItemID() == itemId) {
+				return (int) Server.itemHandler.getItemList(i).getShopValue();
 			}
 		}
 		return 0;

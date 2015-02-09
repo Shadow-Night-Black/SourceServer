@@ -441,10 +441,11 @@ public class ItemAssistant {
 		for (int i = 0; i < c.playerEquipment.length; i++) {
 			if (c.playerEquipment[i] > -1) {
 				for (int j = 0; j < Config.ITEM_LIMIT; j++) {
-					if (Server.itemHandler.ItemList[j] != null) {
-						if (Server.itemHandler.ItemList[j].itemId == c.playerEquipment[i]) {
+					if (Server.itemHandler.getItemList(i) != null) {
+						if (Server.itemHandler.getItemList(i).getItemID() == c.playerEquipment[i]) {
 							for (int k = 0; k < c.playerBonus.length; k++) {
-								c.playerBonus[k] += Server.itemHandler.ItemList[j].Bonuses[k];
+								c.playerBonus[k] += Server.itemHandler
+										.getItemList(j).getBonuses()[k];
 							}
 							break;
 						}
@@ -2112,9 +2113,9 @@ public class ItemAssistant {
 
 	public String getItemName(int ItemID) {
 		for (int i = 0; i < Config.ITEM_LIMIT; i++) {
-			if (Server.itemHandler.ItemList[i] != null) {
-				if (Server.itemHandler.ItemList[i].itemId == ItemID) {
-					return Server.itemHandler.ItemList[i].itemName;
+			if (Server.itemHandler.getItemList(i) != null) {
+				if (Server.itemHandler.getItemList(i).getItemID() == ItemID) {
+					return Server.itemHandler.getItemList(i).getItemName();
 				}
 			}
 		}
@@ -2123,10 +2124,10 @@ public class ItemAssistant {
 
 	public int getItemId(String itemName) {
 		for (int i = 0; i < Config.ITEM_LIMIT; i++) {
-			if (Server.itemHandler.ItemList[i] != null) {
-				if (Server.itemHandler.ItemList[i].itemName
+			if (Server.itemHandler.getItemList(i) != null) {
+				if (Server.itemHandler.getItemList(i).getItemName()
 						.equalsIgnoreCase(itemName)) {
-					return Server.itemHandler.ItemList[i].itemId;
+					return Server.itemHandler.getItemList(i).getItemID();
 				}
 			}
 		}
@@ -2204,20 +2205,16 @@ public class ItemAssistant {
 		int NewID = ItemID - 1;
 		String NotedName = "";
 		for (int i = 0; i < Config.ITEM_LIMIT; i++) {
-			if (Server.itemHandler.ItemList[i] != null) {
-				if (Server.itemHandler.ItemList[i].itemId == ItemID) {
-					NotedName = Server.itemHandler.ItemList[i].itemName;
-				}
+			if (Server.itemHandler.getItemList(i).getItemID() == ItemID) {
+				NotedName = Server.itemHandler.getItemList(i).getItemName();
 			}
 		}
 		for (int i = 0; i < Config.ITEM_LIMIT; i++) {
-			if (Server.itemHandler.ItemList[i] != null) {
-				if (Server.itemHandler.ItemList[i].itemName == NotedName) {
-					if (Server.itemHandler.ItemList[i].itemDescription
-							.startsWith("Swap this note at any bank for a") == false) {
-						NewID = Server.itemHandler.ItemList[i].itemId;
-						break;
-					}
+			if (Server.itemHandler.getItemList(i).getItemName().equals(NotedName)) {
+				if (Server.itemHandler.getItemList(i).getDescription()
+						.startsWith("Swap this note at any bank for a") == false) {
+					NewID = Server.itemHandler.getItemList(i).getItemID();
+					break;
 				}
 			}
 		}

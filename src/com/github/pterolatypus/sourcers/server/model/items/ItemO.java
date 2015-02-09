@@ -177,10 +177,9 @@ public class ItemO {
 	}
 
 	public static String getItemName(int id) {
-		for (int j = 0; j < Server.itemHandler.ItemList.length; j++) {
-			if (Server.itemHandler.ItemList[j] != null)
-				if (Server.itemHandler.ItemList[j].itemId == id)
-					return Server.itemHandler.ItemList[j].itemName;
+		for (int j = 0; j < Server.itemHandler.itemList.size(); j++) {
+			if (Server.itemHandler.getItemList(j).getItemID() == id)
+				return Server.itemHandler.getItemList(j).getItemName();
 		}
 		return null;
 	}

@@ -1,17 +1,17 @@
 package com.github.pterolatypus.sourcers.server.world;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.File;
-import java.util.Scanner;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import com.github.pterolatypus.sourcers.server.Config;
 import com.github.pterolatypus.sourcers.server.model.items.GroundItem;
-import com.github.pterolatypus.sourcers.server.model.items.ItemList;
+import com.github.pterolatypus.sourcers.server.model.items.Item;
 import com.github.pterolatypus.sourcers.server.model.players.Client;
 import com.github.pterolatypus.sourcers.server.model.players.Player;
 import com.github.pterolatypus.sourcers.server.model.players.PlayerHandler;
@@ -23,15 +23,12 @@ import com.github.pterolatypus.sourcers.server.util.Misc;
 
 public class ItemHandler {
 
+	public List<Item> itemList = new ArrayList<Item>(Config.ITEM_LIMIT);
 	public List<GroundItem> items = new ArrayList<GroundItem>();
 	public static final int HIDE_TICKS = 100;
 
 	public ItemHandler() {
-		for (int i = 0; i < Config.ITEM_LIMIT; i++) {
-			ItemList[i] = null;
-		}
 		loadItemList("item.cfg");
-		loadItemPrices("prices.txt");
 	}
 
 	/**
@@ -296,19 +293,13 @@ public class ItemHandler {
 		removeItem(i);
 	}
 
-	/**
-	 * Item List
-	 **/
-
-	public ItemList ItemList[] = new ItemList[Config.ITEM_LIMIT];
-
 	public void newItemList(int ItemId, String ItemName,
 			String ItemDescription, double ShopValue, double LowAlch,
 			double HighAlch, int Bonuses[]) {
 		// first, search for a free slot
 		int slot = -1;
-		for (int i = 0; i < 11740; i++) {
-			if (ItemList[i] == null) {
+		for (int i = 0; i < itemList.size(); i++) {
+			if (itemList.get(i).getItemID() < 0) {
 				slot = i;
 				break;
 			}
@@ -316,39 +307,12 @@ public class ItemHandler {
 
 		if (slot == -1)
 			return; // no free slot found
-		ItemList newItemList = new ItemList(ItemId);
-		newItemList.itemName = ItemName;
-		newItemList.itemDescription = ItemDescription;
-		newItemList.ShopValue = ShopValue;
-		newItemList.LowAlch = LowAlch;
-		newItemList.HighAlch = HighAlch;
-		newItemList.Bonuses = Bonuses;
-		ItemList[slot] = newItemList;
+		Item newItemList = new Item(ItemId, ItemName, ItemDescription, ShopValue, LowAlch, HighAlch, Bonuses);
+		itemList.set(slot, newItemList);
 	}
 
-	public void loadItemPrices(String filename) {
-		try {
-			Scanner s = new Scanner(new File("./data/cfg/" + filename));
-			while (s.hasNextLine()) {
-				String[] line = s.nextLine().split(" ");
-				ItemList temp = getItemList(Integer.parseInt(line[0]));
-				if (temp != null)
-					temp.ShopValue = Integer.parseInt(line[1]);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public ItemList getItemList(int i) {
-		for (int j = 0; j < ItemList.length; j++) {
-			if (ItemList[j] != null) {
-				if (ItemList[j].itemId == i) {
-					return ItemList[j];
-				}
-			}
-		}
-		return null;
+	public Item getItemList(int i) {
+		return (i >= 0 && i < itemList.size())?itemList.get(i):new Item(true);
 	}
 
 	public boolean loadItemList(String FileName) {
