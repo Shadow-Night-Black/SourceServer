@@ -10,6 +10,6 @@
 	<classpathentry kind="lib" path="deps/slf4j.jar"/>
 	<classpathentry kind="lib" path="deps/xstream.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="E:/Runespace/Lib/jdom-2.0.5.jar"/>
+	<classpathentry kind="lib" path="/home/jw16g14/Eclipse/Libs/jdom-2.0.5/jdom-2.0.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

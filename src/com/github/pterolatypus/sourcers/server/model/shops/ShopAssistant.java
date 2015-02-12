@@ -1,20 +1,21 @@
 package com.github.pterolatypus.sourcers.server.model.shops;
 
 import com.github.pterolatypus.sourcers.server.Config;
-import com.github.pterolatypus.sourcers.server.Server;
+import com.github.pterolatypus.sourcers.server.model.items.Item;
+import com.github.pterolatypus.sourcers.server.model.items.ItemDB;
 import com.github.pterolatypus.sourcers.server.model.items.ItemO;
 import com.github.pterolatypus.sourcers.server.model.players.Client;
 import com.github.pterolatypus.sourcers.server.model.players.PlayerHandler;
 import com.github.pterolatypus.sourcers.server.world.ShopHandler;
 
 public class ShopAssistant {
-
-	private Client c;
-
+	
+	private Client	c;
+	
 	public ShopAssistant(Client client) {
 		this.c = client;
 	}
-
+	
 	public boolean shopSellsItem(int itemID) {
 		for (int i = 0; i < ShopHandler.ShopItems.length; i++) {
 			if (itemID == (ShopHandler.ShopItems[c.myShopId][i] - 1)) {
@@ -23,11 +24,11 @@ public class ShopAssistant {
 		}
 		return false;
 	}
-
+	
 	/**
 	 * Shops
 	 **/
-
+	
 	public void openShop(int ShopID) {
 		c.getItems().resetItems(3823);
 		resetShop(ShopID);
@@ -36,7 +37,7 @@ public class ShopAssistant {
 		c.getPA().sendFrame248(3824, 3822);
 		c.getPA().sendFrame126(ShopHandler.ShopName[ShopID], 3901);
 	}
-
+	
 	public void updatePlayerShop() {
 		for (int i = 1; i < Config.MAX_PLAYERS; i++) {
 			if (PlayerHandler.players[i] != null) {
@@ -48,11 +49,11 @@ public class ShopAssistant {
 			}
 		}
 	}
-
+	
 	public void updateshop(int i) {
 		resetShop(i);
 	}
-
+	
 	public void resetShop(int ShopID) {
 		synchronized (c) {
 			int TotalItems = 0;
@@ -95,15 +96,16 @@ public class ShopAssistant {
 			c.flushOutStream();
 		}
 	}
-
+	
 	public double getItemShopValue(int ItemID, int Type, int fromSlot) {
 		double TotPrice = 0;
 		for (int i = 0; i < Config.ITEM_LIMIT; i++) {
-			if (Server.itemHandler.getItemList(i).getItemID() == ItemID) {
-				TotPrice = Server.itemHandler.getItemList(i).getShopValue();
+			Item it = ItemDB.getDatabase().getItemInList(i);
+			if (it.getItemID() == ItemID) {
+				TotPrice = ItemDB.getDatabase().getItemInList(i).getShopValue();
 			}
 		}
-
+		
 		if (ShopHandler.ShopBModifier[c.myShopId] == 1) {
 			TotPrice *= 1;
 			TotPrice *= 1;
@@ -115,20 +117,15 @@ public class ShopAssistant {
 		}
 		return TotPrice;
 	}
-
+	
 	public int getItemShopValue(int itemId) {
-		for (int i = 0; i < Config.ITEM_LIMIT; i++) {
-			if (Server.itemHandler.getItemList(i).getItemID() == itemId) {
-				return (int) Server.itemHandler.getItemList(i).getShopValue();
-			}
-		}
-		return 0;
+		return (int) ItemDB.getDatabase().getItemInList(itemId).getShopValue();
 	}
-
+	
 	/**
 	 * buy item from shop (Shop Price)
 	 **/
-
+	
 	public void buyFromShopPrice(int removeId, int removeSlot) {
 		int ShopValue = (int) Math.floor(getItemShopValue(removeId, 0,
 				removeSlot));
@@ -153,64 +150,64 @@ public class ShopAssistant {
 		c.sendMessage(c.getItems().getItemName(removeId) + ": currently costs "
 				+ ShopValue + " coins" + ShopAdd);
 	}
-
+	
 	public int getSpecialItemValue(int id) {
 		switch (id) {
-		case 6889:
-		case 6914:
-			return 200;
-		case 4151:
-			return 20;
-		case 6916:
-		case 6918:
-		case 6920:
-		case 6922:
-		case 6924:
-			return 50;
-		case 11663:
-		case 11664:
-		case 11665:
-		case 8842:
-			return 30;
-		case 8839:
-		case 8840:
-			return 75;
-		case 10499:
-			return 20;
-		case 8845:
-			return 5;
-		case 8846:
-			return 10;
-		case 8847:
-			return 15;
-		case 8848:
-			return 20;
-		case 8849:
-		case 8850:
-			return 25;
-		case 7462:
-			return 15;
-		case 10551:
-			return 20;
-		case 4712:
-			return 10;
-		case 4714:
-			return 10;
-		case 11694:
-			return 200;
-		case 11696:
-		case 11698:
-		case 11700:
-			return 100;
-		case 10548:
-			return 50;
-		case 11235:
-			return 40;
-
+			case 6889:
+			case 6914:
+				return 200;
+			case 4151:
+				return 20;
+			case 6916:
+			case 6918:
+			case 6920:
+			case 6922:
+			case 6924:
+				return 50;
+			case 11663:
+			case 11664:
+			case 11665:
+			case 8842:
+				return 30;
+			case 8839:
+			case 8840:
+				return 75;
+			case 10499:
+				return 20;
+			case 8845:
+				return 5;
+			case 8846:
+				return 10;
+			case 8847:
+				return 15;
+			case 8848:
+				return 20;
+			case 8849:
+			case 8850:
+				return 25;
+			case 7462:
+				return 15;
+			case 10551:
+				return 20;
+			case 4712:
+				return 10;
+			case 4714:
+				return 10;
+			case 11694:
+				return 200;
+			case 11696:
+			case 11698:
+			case 11700:
+				return 100;
+			case 10548:
+				return 50;
+			case 11235:
+				return 40;
+				
 		}
 		return 0;
 	}
-
+	
 	/**
 	 * Sell item to shop (Shop Price)
 	 **/
@@ -251,7 +248,7 @@ public class ShopAssistant {
 					+ ": shop will buy for " + ShopValue + " coins" + ShopAdd);
 		}
 	}
-
+	
 	public boolean sellItem(int itemID, int fromSlot, int amount) {
 		if (c.myShopId == 14)
 			return false;
@@ -266,7 +263,7 @@ public class ShopAssistant {
 			c.sendMessage("Selling items as an admin has been disabled.");
 			return false;
 		}
-
+		
 		if (amount > 0 && itemID == (c.playerItems[fromSlot] - 1)) {
 			if (ShopHandler.ShopSModifier[c.myShopId] > 1) {
 				boolean IsIn = false;
@@ -283,7 +280,7 @@ public class ShopAssistant {
 					return false;
 				}
 			}
-
+			
 			if (amount > c.playerItemsN[fromSlot]
 					&& (ItemO.itemIsNote[(c.playerItems[fromSlot] - 1)] == true || ItemO.itemStackable[(c.playerItems[fromSlot] - 1)] == true)) {
 				amount = c.playerItemsN[fromSlot];
@@ -321,7 +318,7 @@ public class ShopAssistant {
 		}
 		return true;
 	}
-
+	
 	public boolean addShopItem(int itemID, int amount) {
 		boolean Added = false;
 		if (amount <= 0) {
@@ -348,7 +345,7 @@ public class ShopAssistant {
 		}
 		return true;
 	}
-
+	
 	public boolean buyItem(int itemID, int fromSlot, int amount) {
 		if (!shopSellsItem(itemID) && c.myShopId != 50 && c.myShopId != 60)
 			return false;
@@ -442,7 +439,7 @@ public class ShopAssistant {
 		}
 		return false;
 	}
-
+	
 	public void handleOtherShop(int itemID) {
 		if (c.myShopId == 17) {
 			if (c.magePoints >= getSpecialItemValue(itemID)) {
@@ -466,7 +463,7 @@ public class ShopAssistant {
 			}
 		}
 	}
-
+	
 	public void openSkillCape() {
 		int capes = get99Count();
 		if (capes > 1)
@@ -476,7 +473,7 @@ public class ShopAssistant {
 		c.myShopId = 14;
 		setupSkillCapes(capes, get99Count());
 	}
-
+	
 	/*
 	 * public int[][] skillCapes =
 	 * {{0,9747,4319,2679},{1,2683,4329,2685},{2,2680
@@ -489,10 +486,10 @@ public class ShopAssistant {
 	 * ,2724},{15,2707,4339,2709},{16,2704,4317,2706},{17,2710,4361,
 	 * 2712},{18,2719,4355,2721},{19,2737,4331,2739},{20,2698,4333,2700}};
 	 */
-	public int[] skillCapes = { 9747, 9753, 9750, 9768, 9756, 9759, 9762, 9801,
-			9807, 9783, 9798, 9804, 9780, 9795, 9792, 9774, 9771, 9777, 9786,
-			9810, 9765 };
-
+	public int[]	skillCapes	= { 9747, 9753, 9750, 9768, 9756, 9759, 9762,
+			9801, 9807, 9783, 9798, 9804, 9780, 9795, 9792, 9774, 9771, 9777,
+			9786, 9810, 9765	};
+	
 	public int get99Count() {
 		int count = 0;
 		for (int j = 0; j < c.playerLevel.length; j++) {
@@ -502,7 +499,7 @@ public class ShopAssistant {
 		}
 		return count;
 	}
-
+	
 	public void setupSkillCapes(int capes, int capes2) {
 		synchronized (c) {
 			c.getItems().resetItems(3823);
@@ -510,7 +507,7 @@ public class ShopAssistant {
 			c.myShopId = 14;
 			c.getPA().sendFrame248(3824, 3822);
 			c.getPA().sendFrame126("Skillcape Shop", 3901);
-
+			
 			int TotalItems = 0;
 			TotalItems = capes2;
 			if (TotalItems > ShopHandler.MaxShopItems) {
@@ -529,7 +526,7 @@ public class ShopAssistant {
 			c.flushOutStream();
 		}
 	}
-
+	
 	public void skillBuy(int item) {
 		int nn = get99Count();
 		if (nn > 1)
@@ -558,11 +555,11 @@ public class ShopAssistant {
 		}
 		c.getItems().resetItems(3823);
 	}
-
+	
 	public void openVoid() {
 	}
-
+	
 	public void buyVoid(int item) {
 	}
-
+	
 }

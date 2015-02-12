@@ -5,23 +5,24 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.github.pterolatypus.sourcers.server.Config;
 import com.github.pterolatypus.sourcers.server.Server;
 import com.github.pterolatypus.sourcers.server.model.items.GameItem;
+import com.github.pterolatypus.sourcers.server.model.items.ItemDB;
 import com.github.pterolatypus.sourcers.server.model.items.ItemO;
 import com.github.pterolatypus.sourcers.server.util.Misc;
 
 public class TradeAndDuel {
-
-	private Client c;
-
+	
+	private Client	c;
+	
 	public TradeAndDuel(Client Client) {
 		this.c = Client;
 	}
-
+	
 	/**
 	 * Trading
 	 **/
-
-	public CopyOnWriteArrayList<GameItem> offeredItems = new CopyOnWriteArrayList<GameItem>();
-
+	
+	public CopyOnWriteArrayList<GameItem>	offeredItems	= new CopyOnWriteArrayList<GameItem>();
+	
 	public void requestTrade(int id) {
 		try {
 			Client o = (Client) PlayerHandler.players[id];
@@ -32,7 +33,7 @@ public class TradeAndDuel {
 				c.getTradeAndDuel().openTrade();
 				o.getTradeAndDuel().openTrade();
 			} else if (!c.inTrade) {
-
+				
 				c.tradeRequested = true;
 				c.sendMessage("Sending trade request...");
 				o.sendMessage(c.playerName + ":tradereq:");
@@ -41,10 +42,10 @@ public class TradeAndDuel {
 			Misc.println("Error requesting trade.");
 		}
 	}
-
+	
 	public void openTrade() {
 		Client o = (Client) PlayerHandler.players[c.tradeWith];
-
+		
 		if (o == null) {
 			return;
 		}
@@ -56,7 +57,7 @@ public class TradeAndDuel {
 		resetTItems(3415);
 		resetOTItems(3416);
 		String out = o.playerName;
-
+		
 		if (o.playerRights == 1) {
 			out = "@cr1@" + out;
 		} else if (o.playerRights == 2) {
@@ -70,7 +71,7 @@ public class TradeAndDuel {
 				3535);
 		c.getPA().sendFrame248(3323, 3321);
 	}
-
+	
 	public void resetTItems(int WriteFrame) {
 		synchronized (c) {
 			c.getOutStream().createFrameVarSizeWord(53);
@@ -98,7 +99,7 @@ public class TradeAndDuel {
 			c.flushOutStream();
 		}
 	}
-
+	
 	public boolean fromTrade(int itemID, int fromSlot, int amount) {
 		Client o = (Client) PlayerHandler.players[c.tradeWith];
 		if (o == null) {
@@ -186,7 +187,7 @@ public class TradeAndDuel {
 					break;
 				}
 			}
-
+			
 			o.getPA().sendFrame126(
 					"Trading with: " + c.playerName + " who has @gre@"
 							+ c.getItems().freeSlots() + " free slots", 3417);
@@ -201,13 +202,13 @@ public class TradeAndDuel {
 		}
 		return true;
 	}
-
+	
 	public boolean tradeItem(int itemID, int fromSlot, int amount) {
 		Client o = (Client) PlayerHandler.players[c.tradeWith];
 		if (o == null) {
 			return false;
 		}
-
+		
 		for (int i : Config.ITEM_TRADEABLE) {
 			if (i == itemID) {
 				c.sendMessage("You can't trade this item.");
@@ -250,7 +251,7 @@ public class TradeAndDuel {
 			declineTrade();
 			return false;
 		}
-
+		
 		if (ItemO.itemStackable[itemID] || ItemO.itemIsNote[itemID]) {
 			boolean inTrade = false;
 			for (GameItem item : offeredItems) {
@@ -265,7 +266,7 @@ public class TradeAndDuel {
 					break;
 				}
 			}
-
+			
 			if (!inTrade) {
 				offeredItems.add(new GameItem(itemID, amount));
 				c.getItems().deleteItem2(itemID, amount);
@@ -285,7 +286,7 @@ public class TradeAndDuel {
 		o.getPA().sendFrame126("", 3431);
 		return true;
 	}
-
+	
 	public void resetTrade() {
 		offeredItems.clear();
 		c.inTrade = false;
@@ -299,24 +300,24 @@ public class TradeAndDuel {
 		c.getPA().sendFrame126("Are you sure you want to make this trade?",
 				3535);
 	}
-
+	
 	public void declineTrade() {
 		c.tradeStatus = 0;
 		declineTrade(true);
 	}
-
+	
 	public void declineTrade(boolean tellOther) {
 		c.getPA().removeAllWindows();
 		Client o = (Client) PlayerHandler.players[c.tradeWith];
 		if (o == null) {
 			return;
 		}
-
+		
 		if (tellOther) {
 			o.getTradeAndDuel().declineTrade(false);
 			o.getTradeAndDuel().c.getPA().removeAllWindows();
 		}
-
+		
 		for (GameItem item : offeredItems) {
 			if (item.amount < 1) {
 				continue;
@@ -336,7 +337,7 @@ public class TradeAndDuel {
 		c.inTrade = false;
 		c.tradeWith = 0;
 	}
-
+	
 	public void resetOTItems(int WriteFrame) {
 		synchronized (c) {
 			Client o = (Client) PlayerHandler.players[c.tradeWith];
@@ -370,7 +371,7 @@ public class TradeAndDuel {
 			c.flushOutStream();
 		}
 	}
-
+	
 	public void confirmScreen() {
 		Client o = (Client) PlayerHandler.players[c.tradeWith];
 		if (o == null) {
@@ -393,26 +394,26 @@ public class TradeAndDuel {
 				} else {
 					SendAmount = "" + Misc.format(item.amount);
 				}
-
+				
 				if (Count == 0) {
 					SendTrade = c.getItems().getItemName(item.id);
 				} else {
 					SendTrade = SendTrade + "\\n"
 							+ c.getItems().getItemName(item.id);
 				}
-
+				
 				if (item.stackable) {
 					SendTrade = SendTrade + " x " + SendAmount;
 				}
 				Count++;
 			}
 		}
-
+		
 		c.getPA().sendFrame126(SendTrade, 3557);
 		SendTrade = "Absolutely nothing!";
 		SendAmount = "";
 		Count = 0;
-
+		
 		for (GameItem item : o.getTradeAndDuel().offeredItems) {
 			if (item.id > 0) {
 				if (item.amount >= 1000 && item.amount < 1000000) {
@@ -442,7 +443,7 @@ public class TradeAndDuel {
 		// TODO: find out what 197 does eee 3213
 		c.getPA().sendFrame248(3443, 197);
 	}
-
+	
 	public void giveItems() {
 		Client o = (Client) PlayerHandler.players[c.tradeWith];
 		if (o == null) {
@@ -454,20 +455,20 @@ public class TradeAndDuel {
 					c.getItems().addItem(item.id, item.amount);
 				}
 			}
-
+			
 			c.getPA().removeAllWindows();
 			c.tradeResetNeeded = true;
 		} catch (Exception e) {
 		}
 	}
-
+	
 	/**
 	 * Dueling
 	 **/
-
-	public CopyOnWriteArrayList<GameItem> otherStakedItems = new CopyOnWriteArrayList<GameItem>();
-	public CopyOnWriteArrayList<GameItem> stakedItems = new CopyOnWriteArrayList<GameItem>();
-
+	
+	public CopyOnWriteArrayList<GameItem>	otherStakedItems	= new CopyOnWriteArrayList<GameItem>();
+	public CopyOnWriteArrayList<GameItem>	stakedItems			= new CopyOnWriteArrayList<GameItem>();
+	
 	public void requestDuel(int id) {
 		try {
 			if (id == c.playerId)
@@ -489,7 +490,7 @@ public class TradeAndDuel {
 				} else {
 					c.sendMessage("You need to get closer to your opponent to start the duel.");
 				}
-
+				
 			} else {
 				c.sendMessage("Sending duel request...");
 				o.sendMessage(c.playerName + ":duelreq:");
@@ -498,7 +499,7 @@ public class TradeAndDuel {
 			Misc.println("Error requesting duel.");
 		}
 	}
-
+	
 	public void openDuel() {
 		Client o = (Client) PlayerHandler.players[c.duelingWith];
 		if (o == null) {
@@ -518,7 +519,7 @@ public class TradeAndDuel {
 		c.getPA().sendFrame248(6575, 3321);
 		c.getItems().resetItems(3322);
 	}
-
+	
 	public void sendDuelEquipment(int itemId, int amount, int slot) {
 		synchronized (c) {
 			if (itemId != 0) {
@@ -526,7 +527,7 @@ public class TradeAndDuel {
 				c.getOutStream().writeWord(13824);
 				c.getOutStream().writeByte(slot);
 				c.getOutStream().writeWord(itemId + 1);
-
+				
 				if (amount > 254) {
 					c.getOutStream().writeByte(255);
 					c.getOutStream().writeDWord(amount);
@@ -538,7 +539,7 @@ public class TradeAndDuel {
 			}
 		}
 	}
-
+	
 	public void refreshduelRules() {
 		for (int i = 0; i < c.duelRule.length; i++) {
 			c.duelRule[i] = false;
@@ -546,7 +547,7 @@ public class TradeAndDuel {
 		c.getPA().sendFrame87(286, 0);
 		c.duelOption = 0;
 	}
-
+	
 	public void refreshDuelScreen() {
 		synchronized (c) {
 			Client o = (Client) PlayerHandler.players[c.duelingWith];
@@ -568,10 +569,10 @@ public class TradeAndDuel {
 					item.id = Config.ITEM_LIMIT;
 				}
 				c.getOutStream().writeWordBigEndianA(item.id + 1);
-
+				
 				current++;
 			}
-
+			
 			if (current < 27) {
 				for (int i = current; i < 28; i++) {
 					c.getOutStream().writeByte(1);
@@ -580,7 +581,7 @@ public class TradeAndDuel {
 			}
 			c.getOutStream().endFrameVarSizeWord();
 			c.flushOutStream();
-
+			
 			c.getOutStream().createFrameVarSizeWord(53);
 			c.getOutStream().writeWord(6670);
 			c.getOutStream().writeWord(
@@ -599,7 +600,7 @@ public class TradeAndDuel {
 				c.getOutStream().writeWordBigEndianA(item.id + 1);
 				current++;
 			}
-
+			
 			if (current < 27) {
 				for (int i = current; i < 28; i++) {
 					c.getOutStream().writeByte(1);
@@ -610,9 +611,9 @@ public class TradeAndDuel {
 			c.flushOutStream();
 		}
 	}
-
+	
 	public boolean stakeItem(int itemID, int fromSlot, int amount) {
-
+		
 		for (int i : Config.ITEM_TRADEABLE) {
 			if (i == itemID) {
 				c.sendMessage("You can't stake this item.");
@@ -652,7 +653,7 @@ public class TradeAndDuel {
 			c.getPA().sendFrame126("", 6684);
 			o.getPA().sendFrame126("", 6684);
 		}
-
+		
 		if (!c.getItems().playerHasItem(itemID, amount)) {
 			return false;
 		}
@@ -671,7 +672,7 @@ public class TradeAndDuel {
 				stakedItems.add(new GameItem(itemID, amount));
 			}
 		}
-
+		
 		c.getItems().resetItems(3214);
 		c.getItems().resetItems(3322);
 		o.getItems().resetItems(3214);
@@ -682,7 +683,7 @@ public class TradeAndDuel {
 		o.getPA().sendFrame126("", 6684);
 		return true;
 	}
-
+	
 	public boolean fromDuel(int itemID, int fromSlot, int amount) {
 		Client o = (Client) PlayerHandler.players[c.duelingWith];
 		if (o == null) {
@@ -700,11 +701,11 @@ public class TradeAndDuel {
 				return false;
 			}
 		}
-
+		
 		if (!c.canOffer) {
 			return false;
 		}
-
+		
 		changeDuelStuff();
 		boolean goodSpace = true;
 		if (!ItemO.itemStackable[itemID]) {
@@ -750,7 +751,7 @@ public class TradeAndDuel {
 				}
 			}
 		}
-
+		
 		for (GameItem item : stakedItems) {
 			if (item.id == itemID) {
 				if (!item.stackable) {
@@ -782,7 +783,7 @@ public class TradeAndDuel {
 		}
 		return true;
 	}
-
+	
 	public void confirmDuel() {
 		Client o = (Client) PlayerHandler.players[c.duelingWith];
 		if (o == null) {
@@ -791,7 +792,8 @@ public class TradeAndDuel {
 		}
 		String itemId = "";
 		for (GameItem item : stakedItems) {
-			if (Server.itemHandler.getItemList(item.id).getStackSize() > 1 || ItemO.itemIsNote[item.id]) {
+			if (ItemDB.getDatabase().getItemInList(item.id).getStackSize() > 1
+					|| ItemO.itemIsNote[item.id]) {
 				itemId += c.getItems().getItemName(item.id) + " x "
 						+ Misc.format(item.amount) + "\\n";
 			} else {
@@ -821,13 +823,13 @@ public class TradeAndDuel {
 		}
 		c.getPA().sendFrame126("", 8240);
 		c.getPA().sendFrame126("", 8241);
-
+		
 		String[] rulesOption = { "Players cannot forfeit!",
 				"Players cannot move.", "Players cannot use range.",
 				"Players cannot use melee.", "Players cannot use magic.",
 				"Players cannot drink pots.", "Players cannot eat food.",
 				"Players cannot use prayer." };
-
+		
 		int lineNumber = 8242;
 		for (int i = 0; i < 8; i++) {
 			if (c.duelRule[i]) {
@@ -839,14 +841,14 @@ public class TradeAndDuel {
 		c.getPA().sendFrame248(6412, 197);
 		// c.getPA().showInterface(6412);
 	}
-
+	
 	public void startDuel() {
 		Client o = (Client) PlayerHandler.players[c.duelingWith];
 		if (o == null) {
 			duelVictory();
 		}
 		c.headIconHints = 2;
-
+		
 		if (c.duelRule[7]) {
 			for (int p = 0; p < c.PRAYER.length; p++) { // reset prayer glows
 				c.prayerActive[p] = false;
@@ -892,7 +894,7 @@ public class TradeAndDuel {
 		c.getPA().removeAllWindows();
 		c.specAmount = 10;
 		c.getItems().addSpecialBar(c.playerEquipment[c.playerWeapon]);
-
+		
 		if (c.duelRule[8]) {
 			if (c.duelRule[1]) {
 				c.getPA().movePlayer(c.duelTeleX, c.duelTeleY, 0);
@@ -908,7 +910,7 @@ public class TradeAndDuel {
 						3246 + Misc.random(6), 0);
 			}
 		}
-
+		
 		c.getPA().createPlayerHints(10, o.playerId);
 		c.getPA().showOption(3, 0, "Attack", 1);
 		for (int i = 0; i < 20; i++) {
@@ -920,7 +922,7 @@ public class TradeAndDuel {
 		}
 		c.getPA().requestUpdates();
 	}
-
+	
 	public void duelVictory() {
 		Client o = (Client) PlayerHandler.players[c.duelingWith];
 		if (o != null) {
@@ -954,7 +956,7 @@ public class TradeAndDuel {
 		c.getCombat().resetPlayerAttack();
 		c.duelRequested = false;
 	}
-
+	
 	public void duelRewardInterface() {
 		synchronized (c) {
 			c.getOutStream().createFrameVarSizeWord(53);
@@ -976,11 +978,11 @@ public class TradeAndDuel {
 			c.flushOutStream();
 		}
 	}
-
+	
 	public void claimStakedItems() {
 		for (GameItem item : otherStakedItems) {
 			if (item.id > 0 && item.amount > 0) {
-				if (Server.itemHandler.getItemList(item.id).getStackSize() > 1) {
+				if (ItemDB.getDatabase().getItemInList(item.id).getStackSize() > 1) {
 					if (!c.getItems().addItem(item.id, item.amount)) {
 						Server.itemHandler.createGroundItem(c, item.id,
 								c.getX(), c.getY(), item.amount, c.getId());
@@ -998,7 +1000,7 @@ public class TradeAndDuel {
 		}
 		for (GameItem item : stakedItems) {
 			if (item.id > 0 && item.amount > 0) {
-				if (Server.itemHandler.getItemList(item.id).getStackSize() > 1) {
+				if (ItemDB.getDatabase().getItemInList(item.id).getStackSize() > 1) {
 					if (!c.getItems().addItem(item.id, item.amount)) {
 						Server.itemHandler.createGroundItem(c, item.id,
 								c.getX(), c.getY(), item.amount, c.getId());
@@ -1018,7 +1020,7 @@ public class TradeAndDuel {
 		resetDuelItems();
 		c.duelStatus = 0;
 	}
-
+	
 	public void declineDuel() {
 		c.getPA().removeAllWindows();
 		c.canOffer = true;
@@ -1040,7 +1042,7 @@ public class TradeAndDuel {
 			c.duelRule[i] = false;
 		}
 	}
-
+	
 	public void resetDuel() {
 		c.getPA().showOption(3, 0, "Challenge", 3);
 		c.headIconHints = 0;
@@ -1056,12 +1058,12 @@ public class TradeAndDuel {
 		c.getCombat().resetPlayerAttack();
 		c.duelRequested = false;
 	}
-
+	
 	public void resetDuelItems() {
 		stakedItems.clear();
 		otherStakedItems.clear();
 	}
-
+	
 	public void changeDuelStuff() {
 		Client o = (Client) PlayerHandler.players[c.duelingWith];
 		if (o == null) {
@@ -1072,7 +1074,7 @@ public class TradeAndDuel {
 		o.getPA().sendFrame126("", 6684);
 		c.getPA().sendFrame126("", 6684);
 	}
-
+	
 	public void selectRule(int i) { // rules
 		Client o = (Client) PlayerHandler.players[c.duelingWith];
 		if (o == null) {
@@ -1098,7 +1100,7 @@ public class TradeAndDuel {
 				}
 			}
 		}
-
+		
 		if (i >= 11) {
 			if (c.getItems().freeSlots() < (c.duelSpaceReq)
 					|| o.getItems().freeSlots() < (o.duelSpaceReq)) {
@@ -1112,7 +1114,7 @@ public class TradeAndDuel {
 				return;
 			}
 		}
-
+		
 		if (!c.duelRule[i]) {
 			c.duelRule[i] = true;
 			c.duelOption += c.DUEL_RULE_ID[i];
@@ -1120,12 +1122,12 @@ public class TradeAndDuel {
 			c.duelRule[i] = false;
 			c.duelOption -= c.DUEL_RULE_ID[i];
 		}
-
+		
 		c.getPA().sendFrame87(286, c.duelOption);
 		o.duelOption = c.duelOption;
 		o.duelRule[i] = c.duelRule[i];
 		o.getPA().sendFrame87(286, o.duelOption);
-
+		
 		if (c.duelRule[8]) {
 			if (c.duelRule[1]) {
 				c.duelTeleX = 3366 + Misc.random(12);
@@ -1141,7 +1143,7 @@ public class TradeAndDuel {
 				o.duelTeleY = c.duelTeleY;
 			}
 		}
-
+		
 	}
-
+	
 }
